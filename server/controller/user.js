@@ -12,7 +12,7 @@ router.get('/',auth,(req,res,next)=>{
     User.find()
     .exec()
     .then(data =>{
-        res.status(200).json(data);
+        res.json(data);
     })
     .catch(next);
 });
@@ -24,11 +24,11 @@ router.post('/',(req,res,next)=>{
     .exec()
     .then((data)=>{
         if (data.length >= 1){
-            res.status(409).json({msg:"email already in use"});
+            res.json({msg:"email already in use"});
         }else{
             bcrypt.hash(req.body.password,10,(err,hashPassword)=>{
                 if(err){
-                    return res.status(500).json({error:err});
+                    return res.json({error:err});
                 }else{
                     const user = new User({
                         email:req.body.email,
@@ -36,7 +36,7 @@ router.post('/',(req,res,next)=>{
                     });
                     user.save()
                     .then((data)=>{
-                        res.status(200).json(data);
+                        res.json(data);
                     })
                     .catch(next);
                 }
@@ -51,17 +51,17 @@ router.post('/login',(req,res,next)=>{
     .exec()
     .then((user)=>{
         if(user.length < 1){
-            return res.status(404).json({msg:"Auth failed"});
+            return res.json({msg:"Auth failed"});
         }
         bcrypt.compare(req.body.password,user[0].password,(err,data)=>{
             if(err){
-                return res.status(500).json({error:err});
+                return res.json({error:err});
             }else{
                 if(data){//token is created and set a secret key then expiry time encrypted by citicollege 
                     const token = jwt.sign({id:user[0]._id},'citicollege',{expiresIn:'1hr'});
-                    return res.status(200).json({msg:'Auth successfully',token:token});
+                    return res.json({msg:'Auth successfully',token:token});
                 }else{
-                    return res.status(404).json({msg:"Auth failed"});
+                    return res.json({msg:"Auth failed"});
                 }
             }
         });
